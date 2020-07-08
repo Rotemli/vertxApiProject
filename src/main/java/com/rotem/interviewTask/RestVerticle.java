@@ -28,7 +28,7 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 public class RestVerticle extends AbstractVerticle 
 {
 	//	private static final Logger LOGGER = LoggerFactory.getLogger(RestVerticle.class); 
-
+	private String EVENTBUS_ADDRESS = "com.rotem.api";
 	public static void main( String[] args )
 	{
 		System.out.println("in REST");
@@ -45,13 +45,11 @@ public class RestVerticle extends AbstractVerticle
 				return;
 			}
 		});
-//		vertx.deployVerticle(new RestVerticle());
-//		vertx.deployVerticle(new OrderVerticle());
+
 		Config hazelcastConfig = new Config();
-		// Now set some stuff on the config (omitted)
 		ClusterManager mgr = new HazelcastClusterManager(hazelcastConfig);
 		VertxOptions options = new VertxOptions().setClusterManager(mgr);
-//
+
 		Vertx.clusteredVertx(options, res -> {
 		  if (res.succeeded()) {
 		    Vertx ver = res.result();
@@ -100,20 +98,20 @@ public class RestVerticle extends AbstractVerticle
 			return;
 		}
 
-		//System.out.println("IN ADD ORDER");
+//		System.out.println("IN ADD ORDER");
 		JsonObject order = new JsonObject();
 		//		System.out.println(routingContext.getBodyAsString());
 		String username = routingContext.request().getParam("username");
 		JsonObject jsonBody = routingContext.getBodyAsJson();
 
-		String orderId =  jsonBody.getString("orderId");
+//		String orderId =  jsonBody.getString("orderId");
 		String orderName =  jsonBody.getString("orderName");
 		String orderDate =  jsonBody.getString("orderDate");
 
-		order.put("username", username).put("orderId", orderId).put("orderName", orderName).put("orderDate", orderDate);
+		order.put("username", username).put("orderName", orderName).put("orderDate", orderDate);
 
 		DeliveryOptions options = new DeliveryOptions().addHeader("action", "add-order");
-		vertx.eventBus().request("com.rotem.api", order, options, reply -> {
+		vertx.eventBus().request(EVENTBUS_ADDRESS, order, options, reply -> {
 			if (reply.succeeded()) {
 				response.setStatusCode(200).end();
 			}else {
@@ -134,7 +132,7 @@ public class RestVerticle extends AbstractVerticle
 		username.put("username", name);
 
 		DeliveryOptions options = new DeliveryOptions().addHeader("action", "get-orders");
-		vertx.eventBus().request("com.rotem.api", username, options, reply -> {
+		vertx.eventBus().request(EVENTBUS_ADDRESS, username, options, reply -> {
 			if (reply.succeeded()) {
 				routingContext.response().putHeader("content-type", "application/json").end(Json.encodePrettily(reply.result().body()));
 			}else {
