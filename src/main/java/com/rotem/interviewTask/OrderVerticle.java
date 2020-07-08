@@ -97,9 +97,9 @@ public class OrderVerticle extends AbstractVerticle  {
 		String username = message.body().getString("username");
 		String date = message.body().getString("orderDate");
 		String orderName = message.body().getString("orderName");
-		if(username == null || username =="" || 
-				date == null || date == "" || 
-				orderName == null || orderName == "") {
+		if(username == null || username.equals("") || 
+				date == null || date.equals("") || 
+				orderName == null || orderName.equals("")) {
 			return false;
 		}
 		return true;
@@ -108,7 +108,7 @@ public class OrderVerticle extends AbstractVerticle  {
 	private void handleListOrders(Message<JsonObject> message) {
 		String username = message.body().getString("username");
 		String filePath = "target/classes/" + username + ".json";
-		if(username == null || username == "") {
+		if(username == null || username.equals("")) {
 			message.fail(500, "Username is missing");
 			return;
 		}
